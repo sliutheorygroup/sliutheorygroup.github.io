@@ -1,2 +1,55 @@
 site_name: Liu Theory Group wiki
-theme: readthedocs
+site_description: Liu Theory Group wiki
+theme: 
+  name: readthedocs
+  hightlightjs: true
+  hljs_languages:
+    - python
+    - bash
+    - yaml
+    - markdown
+    - latex
+    - c
+    - cpp
+    - fortran
+    - makefile
+    - cmake
+    - shell
+    - matlab
+    - mathematica
+    - julia
+    - r
+    - html
+    - css
+    - javascript
+    - json
+    - xml
+    - ini
+    - diff
+    - dockerfile
+    - nginx
+    - sql
+    - yaml
+repo_url: https://github.com/sliutheorygroup/sliutheorygroup.github.io
+repo_name: Github
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - footnotes
+  - tables
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+plugins:
+  - search
