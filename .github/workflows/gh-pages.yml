@@ -23,9 +23,15 @@ jobs:
 
     - name: Build the site
       run: mkdocs build --verbose --clean
+    
+    - name: Set Git User
+      run: |
+        git config --global user.name "sliutheorygroup"
+        git config --global user.email "sliutheorygroup@users.noreply.github.com"
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./site
+        external_repository: sliutheorygroup/sliutheorygroup.github.io
