@@ -55,17 +55,20 @@ Pull Request (PR) is a proposal to merge your code to the parent repo.
 
 Once the changes are pushed to your forked repository, submit a PR to the original repository:
 
-1. Go to the original repository's githug webpage.
-2. Click the "Pull Requests" tab.
+* Go to the original repository's githug webpage.
+* Click the "Pull Requests" tab.
+
 ![alt text](../asset/contributing_how_to_contribute/pr.png)
 
-3. Click "New Pull Request."
+* Click "New Pull Request."
+
 ![alt text](../asset/contributing_how_to_contribute/new_pr.png)
 
-4. Select the branch you want to merge from (your forked repository) and the branch you want to merge into (the original repository's main branch).Provide a clear description of the changes you've made and submit the PR.
+* Select the branch you want to merge from (your forked repository) and the branch you want to merge into (the original repository's main branch).Provide a clear description of the changes you've made and submit the PR.
+
 ![alt text](../asset/contributing_how_to_contribute/open_pr.png)
 
-5. After review, your modifications will be merged into the origin repo.
+* After review, your modifications will be merged into the origin repo.
 
 ## 7. Delete the Local Branch
 
