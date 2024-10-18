@@ -193,7 +193,7 @@ ___粗斜体___
 这是行内代码：`f = lambda x: x^2 + 1`
 
 多行代码：
-```python
+```python title='test.py'
 for i in range(10):
     print(i)
 ```\ # 注意，这里没有最后这个"\"，这里是笔误
