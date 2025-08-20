@@ -1,0 +1,243 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="utf-8">
+<title>Hf-O 四面体与极化示意</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist@2.32.0"></script>
+<style>
+body{margin:0;font-family:sans-serif}
+#plot{width:100vw;height:80vh}
+.sel{margin:8px}
+</style>
+</head>
+<body>
+<label class="sel">选择 O 原子:
+<select id="oSel"></select>
+</label>
+<div id="plot"></div>
+
+<script>
+// ==========================================================
+// ----------- 1. 结构数据（来自给定 POSCAR） -------------
+const cell = [
+  [ 10.651388,  0.000000,  0.000000],
+  [ -0.865546,  5.063346,  0.000000],
+  [  0.000004, -0.000003, 10.376656]
+];
+const fracCoords = [ // 47 行
+-0.0022501132448196,0.0058086370401414,0.0108573039041200,
+0.0047282524662399,0.0018761013139569,0.5078668295531400,
+0.4980807251353215,0.0005445038992820,-0.0023897408830004,
+0.5075739270189075,-0.0144074171204997,0.4885076241134735,
+0.2869401332275932,0.4774128355454407,0.5360177585953022,
+0.2896173496569370,0.4582170597348858,0.0483941504216824,
+0.7957414184305160,0.4439403776735871,0.5399627312130886,
+0.7932077560978166,0.4456548321422341,0.0441877441289906,
+0.0413356507614960,0.4429375684451943,0.7546748884410764,
+0.0407369855348339,0.4520365263821942,0.2560879738347638,
+0.5570825197450605,0.4651091126564528,0.7560520970388279,
+0.5443275012291466,0.4377086634146380,0.2447869955405394,
+0.2354984956966066,-0.0107289141181768,0.8035291207024851,
+0.2483387296285494,0.0150918116689231,0.2899084169173189,
+0.7519906054214277,0.0037485638629038,0.7979662751033922,
+0.7527796612861144,-0.0044589072463800,0.2933516483727504,
+0.4061404329115334,0.2516755203743663,0.8580811440719315,
+0.4108147798037405,0.2720463949132820,0.3960950593069905,
+0.8998957170328296,0.2887734734765182,0.8901518078653901,
+0.9021123101225806,0.2841381986279654,0.3916720709484984,
+0.1604509327714869,0.2919416051358021,0.9038486781506672,
+0.1634951432655869,0.2998401289966770,0.3989047924920391,
+0.6536615321203445,0.2761832643420010,0.9019768736810447,
+0.6552356164470217,0.2616757783984672,0.3983946948459623,
+0.3876569466992967,0.1778599795440788,0.1448967960816183,
+0.8800108067288555,0.1633648156290533,0.6575056928848506,
+0.8791898083926075,0.1678921764374995,0.1583904239145864,
+0.1631050651804665,0.1945773303893806,0.6500515316887747,
+0.1440940099943897,0.1939340679611111,0.1526371443598844,
+0.6173090012194442,0.1586480071535898,0.6418990864137331,
+0.6328491814103453,0.1621897313319195,0.1406890313895126,
+0.3143753745251440,0.8002024500790395,0.9464665326844179,
+0.3170110004620489,0.8239604128595628,0.4489096464778251,
+0.8053937125955686,0.7874156516195244,0.9404101572351634,
+0.8096614890067522,0.7821012499475708,0.4384804291224372,
+0.0629610351154521,0.7901822947321219,0.8478396162525190,
+0.0733426566041996,0.8040726339605399,0.3446011621348835,
+0.5649850143084263,0.8010881701180989,0.8509565739890558,
+0.5632386354914586,0.7831643398230563,0.3486869048772006,
+0.4694356610042012,0.6069193225347870,0.6009179025910938,
+0.4787607356240297,0.6478834828675034,0.0958426408116678,
+0.9778252088098804,0.6170225209398680,0.6004654368969439,
+0.9735976136559160,0.6249664936639401,0.1040099269366322,
+0.2282309965973150,0.6815617899065879,0.6849264109220485,
+0.2327034370394754,0.6681395843706452,0.1913602205339320,
+0.7302784584433342,0.6532257280239844,0.6895086205795179,
+0.7226460885244884,0.6453330465465990,0.1906211728612041
+];
+// 分别列出元素索引
+const HfIdx = [...Array(16).keys()];           // 0-15
+const OIdx  = [...Array(31).keys()].map(i=>i+16); // 16-46
+// 工具：分数 -> 笛卡尔
+const frac2cart = f=>{
+  const [u,v,w]=f;
+  return [
+    u*cell[0][0]+v*cell[1][0]+w*cell[2][0],
+    u*cell[0][1]+v*cell[1][1]+w*cell[2][1],
+    u*cell[0][2]+v*cell[1][2]+w*cell[2][2]
+  ];
+};
+// 工具：最小影像分数位移
+const fracDisp = (f1,f2)=>{
+  let d=[0,0,0];
+  for(let k=0;k<3;k++){
+    d[k]=f1[k]-f2[k];
+    d[k]-=Math.round(d[k]);
+  }
+  return d;
+};
+// 把所有原子存成对象数组
+const atoms=[];
+for(let i=0;i<fracCoords.length;i+=3){
+  const frac=[fracCoords[i],fracCoords[i+1],fracCoords[i+2]];
+  atoms.push({
+    frac:frac,
+    cart:frac2cart(frac),
+    symbol:(i/3<16?'Hf':'O'),
+    gidx:i/3
+  });
+}
+// ==========================================================
+// ----------- 2. 逻辑：为给定 O 找到四面体 ------------------
+function findTetra(oGlobalIdx){
+  const O=atoms[oGlobalIdx];
+  // 与全部 Hf 的距离
+  const dlist=HfIdx.map(h=>{
+    const disp=fracDisp(O.frac,atoms[h].frac);
+    const cart=[disp[0]*cell[0][0]+disp[1]*cell[1][0]+disp[2]*cell[2][0],
+                disp[0]*cell[0][1]+disp[1]*cell[1][1]+disp[2]*cell[2][1],
+                disp[0]*cell[0][2]+disp[1]*cell[1][2]+disp[2]*cell[2][2]];
+    const dist=Math.hypot(...cart);
+    return {h,dist,cart};
+  }).sort((a,b)=>a.dist-b.dist);
+  const first3=dlist.slice(0,3).map(obj=>obj.h);
+  for(let i=3;i<dlist.length;i++){
+    const cand=[...first3,dlist[i].h];
+    // 检查六条 Hf-Hf 距离是否 <5 Å
+    let ok=true;
+    outer:for(let m=0;m<4;m++){
+      for(let n=m+1;n<4;n++){
+        const disp=fracDisp(atoms[cand[m]].frac,atoms[cand[n]].frac);
+        const cart=[disp[0]*cell[0][0]+disp[1]*cell[1][0]+disp[2]*cell[2][0],
+                    disp[0]*cell[0][1]+disp[1]*cell[1][1]+disp[2]*cell[2][1],
+                    disp[0]*cell[0][2]+disp[1]*cell[1][2]+disp[2]*cell[2][2]];
+        if(Math.hypot(...cart)>=5){ok=false;break outer;}
+      }
+    }
+    if(ok){
+      const HfCart=cand.map(h=>{
+        const disp=fracDisp(O.frac,atoms[h].frac);
+        return [
+          O.cart[0]-disp[0]*cell[0][0]-disp[1]*cell[1][0]-disp[2]*cell[2][0],
+          O.cart[1]-disp[0]*cell[0][1]-disp[1]*cell[1][1]-disp[2]*cell[2][1],
+          O.cart[2]-disp[0]*cell[0][2]-disp[1]*cell[1][2]-disp[2]*cell[2][2]
+        ]; // ASE 的 vector=True 思想
+      });
+      const center=[
+        (HfCart[0][0]+HfCart[1][0]+HfCart[2][0]+HfCart[3][0])/4,
+        (HfCart[0][1]+HfCart[1][1]+HfCart[2][1]+HfCart[3][1])/4,
+        (HfCart[0][2]+HfCart[1][2]+HfCart[2][2]+HfCart[3][2])/4
+      ];
+      return {HfIdx:cand,HfCart,center};
+    }
+  }
+  return null; // 未找到
+}
+// ==========================================================
+// ----------- 3. Plotly 场景 --------------------------------
+const oSelect=document.getElementById('oSel');
+OIdx.forEach((g,i)=>{
+  const opt=document.createElement('option');
+  opt.value=g; opt.text=`O ${i+1} (全局 #${g})`;
+  oSelect.appendChild(opt);
+});
+oSelect.addEventListener('change',()=>updatePlot(parseInt(oSelect.value)));
+updatePlot(OIdx[0]); // 初始
+
+function updatePlot(oIdx){
+  const tetra=findTetra(oIdx);
+  const data=[];
+  // 全部 Hf
+  data.push({
+    type:'scatter3d',mode:'markers',
+    x:HfIdx.map(i=>atoms[i].cart[0]),
+    y:HfIdx.map(i=>atoms[i].cart[1]),
+    z:HfIdx.map(i=>atoms[i].cart[2]),
+    marker:{size:3,color:'rgba(160,160,160,0.7)'},
+    name:'Hf'
+  });
+  // 全部 O
+  data.push({
+    type:'scatter3d',mode:'markers',
+    x:OIdx.map(i=>atoms[i].cart[0]),
+    y:OIdx.map(i=>atoms[i].cart[1]),
+    z:OIdx.map(i=>atoms[i].cart[2]),
+    marker:{size:3,color:'rgba(255,150,150,0.7)'},
+    name:'O'
+  });
+  // 选中 O
+  data.push({
+    type:'scatter3d',mode:'markers',
+    x:[atoms[oIdx].cart[0]],
+    y:[atoms[oIdx].cart[1]],
+    z:[atoms[oIdx].cart[2]],
+    marker:{size:6,color:'red'},
+    name:'选中 O'
+  });
+  if(tetra){
+    // 四个 Hf
+    data.push({
+      type:'scatter3d',mode:'markers',
+      x:tetra.HfCart.map(p=>p[0]),
+      y:tetra.HfCart.map(p=>p[1]),
+      z:tetra.HfCart.map(p=>p[2]),
+      marker:{size:6,color:'gold'},
+      name:'四面体 Hf'
+    });
+    // 棱线
+    const xl=[],yl=[],zl=[];
+    for(let m=0;m<4;m++){
+      for(let n=m+1;n<4;n++){
+        xl.push(tetra.HfCart[m][0],tetra.HfCart[n][0],null);
+        yl.push(tetra.HfCart[m][1],tetra.HfCart[n][1],null);
+        zl.push(tetra.HfCart[m][2],tetra.HfCart[n][2],null);
+      }
+    }
+    data.push({
+      type:'scatter3d',mode:'lines',
+      x:xl,y:yl,z:zl,
+      line:{color:'gold',width:3},
+      name:'四面体棱'
+    });
+    // 质心
+    data.push({
+      type:'scatter3d',mode:'markers',
+      x:[tetra.center[0]],y:[tetra.center[1]],z:[tetra.center[2]],
+      marker:{size:5,color:'green'},
+      name:'质心'
+    });
+    // 位移向量
+    data.push({
+      type:'scatter3d',mode:'lines',
+      x:[tetra.center[0],atoms[oIdx].cart[0]],
+      y:[tetra.center[1],atoms[oIdx].cart[1]],
+      z:[tetra.center[2],atoms[oIdx].cart[2]],
+      line:{color:'blue',width:4},
+      name:'Δ⃗(O-cent)'
+    });
+  }
+  Plotly.newPlot('plot',data,{
+    margin:{l:0,b:0,r:0,t:0},
+    scene:{aspectmode:'data'}
+  },{responsive:true});
+}
+</script>
+
+
+</body></html>
